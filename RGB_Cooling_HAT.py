@@ -16,8 +16,8 @@ import subprocess
 hat_addr = 0x0d
 rgb_effect_reg = 0x04
 fan_reg = 0x08
-fan_state = 2
 count = 0
+fan_speed = 0
 
 # Raspberry Pi pin configuration:
 RST = None     # on the PiOLED this pin isnt used
@@ -102,59 +102,56 @@ def setOLEDshow():
     # Draw a black filled box to clear the image.
     draw.rectangle((0,0,width,height), outline=0, fill=0)
 
-    #cmd = "top -bn1 | grep load | awk '{printf \"CPU:%.0f%%\", $(NF-2)*100}'"
-    #CPU = run(cmd)
-    CPU = getCPULoadRate()
-
     cmd = os.popen('vcgencmd measure_temp').readline()
-    CPU_TEMP = cmd.replace("temp=","Temp:").replace("'C\n","C")
     global g_temp
     g_temp = float(cmd.replace("temp=","").replace("'C\n",""))
 
-    cmd = "free -m | awk 'NR==2{printf \"RAM:%s/%s MB\", $2-$3,$2}'"
-    MemUsage = run(cmd)
-
-    cmd = "df -h | awk '$NF==\"/\"{printf \"Disk:%d/%dMB\", ($2-$3)*1024,$2*1024}'"
-    Disk = run(cmd)
-
-    cmd = "hostname -I | cut -d\' \' -f1"
-    IP = run(cmd)
-
     # Write two lines of text.
 
-    draw.text((x, top), str(CPU), font=font, fill=255)
-    draw.text((x+56, top), str(CPU_TEMP), font=font, fill=255)
-    draw.text((x, top+8), str(MemUsage),  font=font, fill=255)
-    draw.text((x, top+16), str(Disk),  font=font, fill=255)
-    draw.text((x, top+24), "wlan0:" + str(IP),  font=font, fill=255)
+    draw.text((x, top+8), "CPU Temp: " + str(g_temp),  font=font, fill=255)
+    draw.text((x, top+16), "Time: " + str(time.strftime('%H:%M:%S')),  font=font, fill=255)
+    draw.text((x, top+24), "Fan Speed: " + str(fan_speed) + "%",  font=font, fill=255)
 
     # Display image.
     disp.image(image)
     disp.display()
-    time.sleep(.1)
+    time.sleep(1)
 
 setFanSpeed(0x00)
 setRGBEffect(0x03)
 
 while True:
-    setOLEDshow()	
-    if g_temp >= 55:
-        if fan_state != 1:
-            setFanSpeed(0x01)
-            fan_state = 1        
-    elif g_temp <= 48:
-        if fan_state != 0:
+    try:
+        setOLEDshow()	
+        
+        if g_temp <= 40:            
+            fan_speed = 0
             setFanSpeed(0x00)
-            fan_state = 0
-    
-    if count == 10:
-        setRGBEffect(0x04)
-    elif count == 20:
-        setRGBEffect(0x02)
-    elif count == 30:
-        setRGBEffect(0x01)
-    elif count == 40:
-        setRGBEffect(0x03)
-        count = 0
-    count += 1
-    time.sleep(.5)
+        elif g_temp <= 42:            
+            fan_speed = 40
+            setFanSpeed(0x04)
+        elif g_temp <= 44:            
+            fan_speed = 60
+            setFanSpeed(0x06)
+        elif g_temp <= 46:            
+            fan_speed = 80
+            setFanSpeed(0x08)
+        elif g_temp <= 48:            
+            fan_speed = 90
+            setFanSpeed(0x09)
+        else:            
+            fan_speed = 100
+            setFanSpeed(0x01)
+        
+        if count == 10:
+            setRGBEffect(0x04)
+        elif count == 20:
+            setRGBEffect(0x02)
+        elif count == 30:
+            setRGBEffect(0x01)
+        elif count == 40:
+            setRGBEffect(0x03)
+            count = 0
+        count += 1
+    except:
+        pass

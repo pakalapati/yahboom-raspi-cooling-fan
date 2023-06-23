@@ -66,6 +66,34 @@ the lights simply stay default green and aren't changed:
 @reboot /usr/bin/python3 /home/pi/src/yahboom-raspi-cooling-fan/oled.py
 ```
 
+### The way I (Aditya) did it.
+
+Had to install Adafruit_BBIO by following the manual instructions on the official website.
+
+sudo pip all the required modules :P
+
+Created systemd service by
+
+```
+sudo nano /lib/systemd/system/pifan.service
+```
+
+```
+[Unit]
+Description=Solar IOT Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 <folder_path>/RGB_Cooling_HAT.py
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then follow the steps to start a systemd service.
+
 See Also
 --------
 
