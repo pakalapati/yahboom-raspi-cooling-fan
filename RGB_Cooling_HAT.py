@@ -18,6 +18,7 @@ rgb_effect_reg = 0x04
 fan_reg = 0x08
 count = 0
 fan_speed = 0
+Max_LED = 3
 
 # Raspberry Pi pin configuration:
 RST = None     # on the PiOLED this pin isnt used
@@ -62,8 +63,17 @@ font = ImageFont.load_default()
 def setFanSpeed(speed):
     bus.write_byte_data(hat_addr, fan_reg, speed&0xff)
 
-def setRGBEffect(effect):
-    bus.write_byte_data(hat_addr, rgb_effect_reg, effect&0xff)
+def setRGB(num, r, g, b):
+    if num >= Max_LED:
+        bus.write_byte_data(hat_addr, 0x00, 0xff)
+        bus.write_byte_data(hat_addr, 0x01, r&0xff)
+        bus.write_byte_data(hat_addr, 0x02, g&0xff)
+        bus.write_byte_data(hat_addr, 0x03, b&0xff)
+    elif num >= 0:
+        bus.write_byte_data(hat_addr, 0x00, num&0xff)
+        bus.write_byte_data(hat_addr, 0x01, r&0xff)
+        bus.write_byte_data(hat_addr, 0x02, g&0xff)
+        bus.write_byte_data(hat_addr, 0x03, b&0xff)
 
 def getCPULoadRate():
     f1 = os.popen("cat /proc/stat", 'r')
@@ -118,40 +128,36 @@ def setOLEDshow():
     time.sleep(1)
 
 setFanSpeed(0x00)
-setRGBEffect(0x03)
 
 while True:
     try:
-        setOLEDshow()	
+
+        setOLEDshow()
         
         if g_temp <= 40:            
             fan_speed = 0
             setFanSpeed(0x00)
+            setRGB(Max_LED, 0x00, 0x00, 0xff)
         elif g_temp <= 42:            
             fan_speed = 40
             setFanSpeed(0x04)
+            setRGB(Max_LED, 0x00, 0xbf, 0xff)
         elif g_temp <= 44:            
             fan_speed = 60
             setFanSpeed(0x06)
+            setRGB(Max_LED, 0xff, 0xff, 0x00)
         elif g_temp <= 46:            
             fan_speed = 80
             setFanSpeed(0x08)
+            setRGB(Max_LED, 0xff, 0xa5, 0x00)
         elif g_temp <= 48:            
             fan_speed = 90
             setFanSpeed(0x09)
+            setRGB(Max_LED, 0xff, 0x45, 0x00)
         else:            
             fan_speed = 100
             setFanSpeed(0x01)
+            setRGB(Max_LED, 0xff, 0x00, 0x00)
         
-        if count == 10:
-            setRGBEffect(0x04)
-        elif count == 20:
-            setRGBEffect(0x02)
-        elif count == 30:
-            setRGBEffect(0x01)
-        elif count == 40:
-            setRGBEffect(0x03)
-            count = 0
-        count += 1
     except:
         pass
