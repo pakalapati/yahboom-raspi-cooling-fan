@@ -5,11 +5,11 @@ import os
 import smbus
 bus = smbus.SMBus(1)
 
-import Adafruit_SSD1306
+# import Adafruit_SSD1306
 
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+# from PIL import Image
+# from PIL import ImageDraw
+# from PIL import ImageFont
 
 import subprocess
 
@@ -21,40 +21,40 @@ fan_speed = 0
 Max_LED = 3
 
 # Raspberry Pi pin configuration:
-RST = None     # on the PiOLED this pin isnt used
+# RST = None     # on the PiOLED this pin isnt used
 
 # 128x32 display with hardware I2C:
-disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST)
+# disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST)
 
 # Initialize library.
-disp.begin()
+# disp.begin()
 
 # Clear display.
-disp.clear()
-disp.display()
+# disp.clear()
+# disp.display()
 
 # Create blank image for drawing.
 # Make sure to create image with mode '1' for 1-bit color.
-width = disp.width
-height = disp.height
-image = Image.new('1', (width, height))
+# width = disp.width
+# height = disp.height
+# image = Image.new('1', (width, height))
 
 # Get drawing object to draw on image.
-draw = ImageDraw.Draw(image)
+# draw = ImageDraw.Draw(image)
 
 # Draw a black filled box to clear the image.
-draw.rectangle((0,0,width,height), outline=0, fill=0)
+# draw.rectangle((0,0,width,height), outline=0, fill=0)
 
 # Draw some shapes.
 # First define some constants to allow easy resizing of shapes.
-padding = -2
-top = padding
-bottom = height-padding
+# padding = -2
+# top = padding
+# bottom = height-padding
 # Move left to right keeping track of the current x position for drawing shapes.
-x = 0
+# x = 0
 
 # Load default font.
-font = ImageFont.load_default()
+# font = ImageFont.load_default()
 
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
@@ -110,7 +110,7 @@ def run(cmd: str) -> str:
 
 def setOLEDshow():
     # Draw a black filled box to clear the image.
-    draw.rectangle((0,0,width,height), outline=0, fill=0)
+    # draw.rectangle((0,0,width,height), outline=0, fill=0)
 
     cmd = os.popen('vcgencmd measure_temp').readline()
     global g_temp
@@ -118,13 +118,13 @@ def setOLEDshow():
 
     # Write two lines of text.
 
-    draw.text((x, top+8), "CPU Temp: " + str(g_temp),  font=font, fill=255)
-    draw.text((x, top+16), "Time: " + str(time.strftime('%H:%M:%S')),  font=font, fill=255)
-    draw.text((x, top+24), "Fan Speed: " + str(fan_speed) + "%",  font=font, fill=255)
+    # draw.text((x, top+8), "CPU Temp: " + str(g_temp),  font=font, fill=255)
+    # draw.text((x, top+16), "Time: " + str(time.strftime('%H:%M:%S')),  font=font, fill=255)
+    # draw.text((x, top+24), "Fan Speed: " + str(fan_speed) + "%",  font=font, fill=255)
 
     # Display image.
-    disp.image(image)
-    disp.display()
+    # disp.image(image)
+    # disp.display()
     time.sleep(1)
 
 setFanSpeed(0x00)
